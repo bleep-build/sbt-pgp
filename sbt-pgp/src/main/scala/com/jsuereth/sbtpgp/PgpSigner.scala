@@ -1,9 +1,11 @@
 package com.jsuereth.sbtpgp
 
+import sbt.Keys.TaskStreams
+
+import java.io.File
 import scala.sys.process.ProcessLogger
-import sbt._
-import Keys._
 import com.jsuereth.pgp.cli.PgpCommandContext
+import sbt.io.IO
 
 /** The interface used to sign plugins. */
 trait PgpSigner {

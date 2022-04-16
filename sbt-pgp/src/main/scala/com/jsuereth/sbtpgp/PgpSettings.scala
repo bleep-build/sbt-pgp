@@ -14,7 +14,7 @@ object PgpSettings {
     inScope(Global)(gpgConfigurationSettings ++ bouncyCastleConfigurationSettings ++ signVerifyConfigurationSettings)
 
   /** Settings this plugin defines. TODO - require manual setting of these... */
-  lazy val projectSettings: Seq[Setting[_]] = signingSettings ++ verifySettings
+  lazy val projectSettings: Seq[Setting[_]] = signingSettings
 
   /** Configuration for GPG command line */
   lazy val gpgConfigurationSettings: Seq[Setting[_]] = Seq(
@@ -107,17 +107,6 @@ object PgpSettings {
       pgpSelectPassphrase.value
     )
   }
-
-  /** Helper to initialize the BC PgpVerifier */
-  private[this] def bcPgpVerifierFactory: Def.Initialize[Task[PgpVerifierFactory]] = Def.task {
-    new BouncyCastlePgpVerifierFactory(pgpCmdContext.value)
-  }
-
-  /** Helper to initialize the GPG PgpVerifier */
-  private[this] def gpgVerifierFactory: Def.Initialize[Task[PgpVerifierFactory]] = Def.task {
-    new CommandLineGpgVerifierFactory(gpgCommand.value, pgpCmdContext.value)
-  }
-
   /** These are all the configuration related settings that are common
    * for a multi-project build, and can be re-used on
    * ThisBuild or maybe Global.
@@ -126,7 +115,6 @@ object PgpSettings {
     // TODO - move these to the signArtifactSettings?
     (pgpSigner / skip) := ((pgpSigner / skip) ?? false).value,
     pgpSigner := switch(useGpg, switch(useGpgPinentry, gpgPinEntrySigner, gpgSigner), bcPgpSigner).value,
-    pgpVerifierFactory := switch(useGpg, gpgVerifierFactory, bcPgpVerifierFactory).value
   )
 
   /** Configuration for signing artifacts.  If you use new scopes for
@@ -171,30 +159,4 @@ object PgpSettings {
       if (skp) Def.task { s.log.debug(s"Skipping publishSigned for ${ref.project}") } else
         Classpaths.publishTask(config, deliver)
     }
-
-  /** Settings used to verify signatures on dependent artifacts. */
-  lazy val verifySettings: Seq[Setting[_]] = Seq(
-    // TODO - This is checking SBT and its plugins signatures..., maybe we can have this be a separate config or something.
-    /*signaturesModule in updateClassifiers <<= (projectID, sbtDependency, loadedBuild, thisProjectRef) map { ( pid, sbtDep, lb, ref) =>
-      val pluginIDs: Seq[ModuleID] = lb.units(ref.build).unit.plugins.fullClasspath.flatMap(_ get moduleID.key)
-      GetSignaturesModule(pid, sbtDep +: pluginIDs, Configurations.Default :: Nil)
-    },*/
-    (updatePgpSignatures / signaturesModule) := {
-      GetSignaturesModule(projectID.value, libraryDependencies.value, Configurations.Default :: Nil)
-    },
-    updatePgpSignatures := {
-      PgpSignatureCheck.resolveSignatures(
-        ivySbt.value,
-        GetSignaturesConfiguration(
-          (updatePgpSignatures / signaturesModule).value,
-          updateConfiguration.value,
-          ivyScala.value
-        ),
-        streams.value.log
-      )
-    },
-    checkPgpSignatures := {
-      PgpSignatureCheck.checkSignaturesTask(updatePgpSignatures.value, pgpVerifierFactory.value, streams.value)
-    }
-  )
 }

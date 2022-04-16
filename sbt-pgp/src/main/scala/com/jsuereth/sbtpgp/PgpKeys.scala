@@ -8,7 +8,6 @@ import sbt.sbtpgp.Compat._
 object PgpKeys {
   // PGP related setup
   val pgpSigner = taskKey[PgpSigner]("The helper class to run gpg commands.")
-  val pgpVerifierFactory = taskKey[PgpVerifierFactory]("The helper class to verify public keys from a public key ring.")
   val pgpKeyRing = settingKey[Option[File]](
     "The location of the key ring, passed to gpg command as --no-default-keyring --keyring <value>."
   )
@@ -34,13 +33,6 @@ object PgpKeys {
   val useGpgPinentry = settingKey[Boolean](
     "If this is set to true, the GPG command line will expect pinentry will be used with gpg-agent."
   )
-
-  // Checking PGP Signatures options
-  val signaturesModule = taskKey[GetSignaturesModule]("")
-  val updatePgpSignatures =
-    taskKey[UpdateReport]("Resolves and optionally retrieves signatures for artifacts, transitively.")
-  val checkPgpSignatures =
-    taskKey[SignatureCheckReport]("Checks the signatures of artifacts to see if they are trusted.")
 
   // Publishing settings
   val publishSignedConfiguration = taskKey[PublishConfiguration]("Configuration for publishing to a repository.")
