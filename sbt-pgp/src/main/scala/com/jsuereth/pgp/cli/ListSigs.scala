@@ -1,9 +1,8 @@
 package com.jsuereth.pgp
 package cli
 
-import sbt._
-import sbt.complete._
-import sbt.complete.DefaultParsers._
+import nosbt.internal.util.complete.Parser
+import nosbt.internal.util.complete.DefaultParsers._
 
 /** Lists Signatures on a file. */
 case class ListSigs() extends PgpCommand {
@@ -18,7 +17,7 @@ case class ListSigs() extends PgpCommand {
   override def isReadOnly = true
 }
 object ListSigs {
-  def parser(ctx: PgpStaticContext): Parser[PgpCommand] =
+  def parser: Parser[PgpCommand] =
     token("list-sigs") map { _ =>
       ListSigs()
     }

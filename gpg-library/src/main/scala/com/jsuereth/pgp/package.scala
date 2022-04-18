@@ -1,8 +1,8 @@
 package com.jsuereth.pgp
 
-import java.io._
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider
+
+import java.io._
 
 // TODO - make this a real package object?
 object PGP {
@@ -18,7 +18,7 @@ object PGP {
     }
     java.security.Security.addProvider(newProvider)
   } catch {
-    case t: Throwable => sys.error("Could not initialize bouncy castle encryption.")
+    case _: Throwable => sys.error("Could not initialize bouncy castle encryption.")
   }
 
   /** This is a helper method used to make sure the above initialization happens. */

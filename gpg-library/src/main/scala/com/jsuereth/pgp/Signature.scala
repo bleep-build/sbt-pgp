@@ -9,12 +9,11 @@ class Signature(val nested: PGPSignature) extends StreamingSaveable {
   /** Returns the name-value string pairs in the notation data occurrences of a signature. */
   // TODO - return a map
   // TODO - Ensure string->string is ok for all returned values...
-  object notations extends Traversable[(String, String)] {
-    override def foreach[U](f: ((String, String)) => U): Unit =
-      for {
-        data <- nested.getHashedSubPackets.getNotationDataOccurrences
-      } f(data.getNotationName() -> data.getNotationValue())
-  }
+  val notations: List[(String, String)] =
+    nested.getHashedSubPackets.getNotationDataOccurrences
+      .map(data => data.getNotationName -> data.getNotationValue)
+      .toList
+
   def keyID = nested.getKeyID
   def issuerKeyID = nested.getHashedSubPackets.getIssuerKeyID
   def keyExpirationTime = nested.getHashedSubPackets.getKeyExpirationTime
@@ -47,5 +46,4 @@ class Signature(val nested: PGPSignature) extends StreamingSaveable {
 
 object Signature {
   def apply(sig: PGPSignature): Signature = new Signature(sig)
-  implicit def unwrap(sig: Signature): PGPSignature = sig.nested
 }

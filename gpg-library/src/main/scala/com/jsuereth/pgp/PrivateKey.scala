@@ -1,10 +1,5 @@
 package com.jsuereth.pgp
 
-import java.security.Security
-
-import java.io._
-import java.util.Date
-
 import org.bouncycastle.bcpg._
 import org.bouncycastle.openpgp._
 import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory
@@ -14,6 +9,11 @@ import org.bouncycastle.openpgp.operator.jcajce.{
   JcePBESecretKeyDecryptorBuilder,
   JcePublicKeyDataDecryptorFactoryBuilder
 }
+
+import java.io._
+import java.security.Security
+import java.util.Date
+import scala.collection.JavaConverters._
 
 class IncorrectPassphraseException(msg: String, cause: Throwable) extends RuntimeException(msg, cause)
 
@@ -30,9 +30,8 @@ class SecretKey(val nested: PGPSecretKey) {
   /** Returns the public key associated with this key. */
   def publicKey = PublicKey(nested.getPublicKey)
 
-  /** Creates a signature for the data in the input stream on the output stream.
-   * Note: This will close all streams.
-   */
+  /** Creates a signature for the data in the input stream on the output stream. Note: This will close all streams.
+    */
   def signStream(in: InputStream, signature: OutputStream, pass: Array[Char]): Unit = {
     val privateKey = extractPrivateKey(pass)
     val sGen = {
@@ -119,15 +118,14 @@ class SecretKey(val nested: PGPSecretKey) {
   def signMessageString(input: String, name: String, pass: Array[Char]): String = {
     val out = new java.io.ByteArrayOutputStream
     val bytes = input.getBytes
-    signMessageStream(new java.io.ByteArrayInputStream(bytes), name, bytes.length, out, pass)
+    signMessageStream(new java.io.ByteArrayInputStream(bytes), name, bytes.length.toLong, out, pass)
     out.toString(java.nio.charset.Charset.defaultCharset.name)
   }
 
   // TODO - Split this into pieces.
   /** Signs an input stream of bytes and writes it to the output stream. */
-  def signMessageFile(file: File, out: OutputStream, pass: Array[Char]): Unit = {
+  def signMessageFile(file: File, out: OutputStream, pass: Array[Char]): Unit =
     signMessageStream(new java.io.FileInputStream(file), file.getName, file.length, out, pass)
-  }
 
   /** Takes a public key and signs it, returning the new public key. */
   // TODO - notation optional?
@@ -157,13 +155,13 @@ class SecretKey(val nested: PGPSecretKey) {
     out.close()
     // TODO - Is this correct for GnuPG?
     key.userIDs.toSeq match {
-      case Seq(user, _*) => PublicKey(PGPPublicKey.addCertification(key, user, sGen.generate()))
-      case _             => PublicKey(PGPPublicKey.addCertification(key, sGen.generate()))
+      case Seq(user, _*) => PublicKey(PGPPublicKey.addCertification(key.nested, user, sGen.generate()))
+      case _             => PublicKey(PGPPublicKey.addCertification(key.nested, sGen.generate()))
     }
   }
 
   /** Decrypts a file, attempting to write to the filename specified in the message. */
-  def decryptFile(file: File, passPhrase: Array[Char]): Unit = {
+  def decryptFile(file: File, passPhrase: Array[Char]): Unit =
     decryptHelper(new FileInputStream(file), passPhrase) { msg =>
       val unc = msg.getInputStream
       val outfile = new File(file.getParentFile, msg.getFileName)
@@ -176,7 +174,6 @@ class SecretKey(val nested: PGPSecretKey) {
       read()
       fOut.close()
     }
-  }
 
   /** Decrypts a given string message using this secret key. */
   def decryptString(input: String, passPhrase: Array[Char]): String = {
@@ -190,9 +187,8 @@ class SecretKey(val nested: PGPSecretKey) {
     bout.toString(java.nio.charset.Charset.defaultCharset.name)
   }
 
-  /** Decrypts a given input stream into the output stream.
-   * Note: This ignores fileNames if they are part of the decrypted message.
-   */
+  /** Decrypts a given input stream into the output stream. Note: This ignores fileNames if they are part of the decrypted message.
+    */
   def decrypt(input: InputStream, output: OutputStream, passPhrase: Array[Char]): Unit =
     decryptHelper(input, passPhrase) { msg =>
       val unc = msg.getInputStream
@@ -208,50 +204,44 @@ class SecretKey(val nested: PGPSecretKey) {
 
   private[this] def decryptHelper[U](input: InputStream, passPhrase: Array[Char])(handler: PGPLiteralData => U): U = {
     val fixIn = PGPUtil.getDecoderStream(input)
-    try {
-      val objF = new JcaPGPObjectFactory(fixIn)
-      // TODO - better method to advance to encrypted data.
-      val enc = objF.nextObject match {
-        case e: PGPEncryptedDataList => e
-        case _                       => objF.nextObject.asInstanceOf[PGPEncryptedDataList]
-      }
-      import collection.JavaConverters._
-      val it = enc.getEncryptedDataObjects()
-      val pbe = (for {
-        obj <- it.asInstanceOf[java.util.Iterator[AnyRef]].asScala
-        if obj.isInstanceOf[PGPPublicKeyEncryptedData]
-      } yield obj.asInstanceOf[PGPPublicKeyEncryptedData]).toTraversable.headOption.getOrElse {
-        throw new IllegalArgumentException("Secret key for message not found.")
-      }
-      // TODO - Better exception?
-      if (pbe.getKeyID != this.keyID) throw new KeyNotFoundException(pbe.getKeyID)
-      val privKey = extractPrivateKey(passPhrase)
-      val clear = {
-        val provider = Security.getProvider("BC")
-        val dataDecryptorFactory = new JcePublicKeyDataDecryptorFactoryBuilder()
-          .setProvider(provider)
-          .setContentProvider(provider)
-          .build(privKey)
-        pbe.getDataStream(dataDecryptorFactory)
-      }
-      val plainFact = new JcaPGPObjectFactory(clear)
-      // Handle compressed + uncompressed data here.
-      def extractLiteral(x: Any): PGPLiteralData = x match {
-        case msg: PGPLiteralData      => msg
-        case cData: PGPCompressedData =>
-          // Now we need to read the compressed stream of data.
-          val compressedStream = new BufferedInputStream(cData.getDataStream)
-          val pgpFact = new JcaPGPObjectFactory(compressedStream)
-          extractLiteral(pgpFact.nextObject)
-        case msg: PGPOnePassSignature => throw new NotEncryptedMessageException("Message is a signature")
-        case _                        => throw new NotEncryptedMessageException("Message is not a simple encrypted file")
-      }
-      val msg = extractLiteral(plainFact.nextObject)
-      val result = handler(msg)
-      if (pbe.isIntegrityProtected && !pbe.verify())
-        throw new IntegrityException("Encrypted message failed integrity check.")
-      result
+    val objF = new JcaPGPObjectFactory(fixIn)
+    // TODO - better method to advance to encrypted data.
+    val enc = objF.nextObject match {
+      case e: PGPEncryptedDataList => e
+      case _                       => objF.nextObject.asInstanceOf[PGPEncryptedDataList]
     }
+    val pbe = enc.getEncryptedDataObjects.asScala
+      .collectFirst { case x: PGPPublicKeyEncryptedData => x }
+      .getOrElse(throw new IllegalArgumentException("Secret key for message not found."))
+
+    // TODO - Better exception?
+    if (pbe.getKeyID != this.keyID) throw KeyNotFoundException(pbe.getKeyID)
+    val privKey = extractPrivateKey(passPhrase)
+    val clear = {
+      val provider = Security.getProvider("BC")
+      val dataDecryptorFactory = new JcePublicKeyDataDecryptorFactoryBuilder()
+        .setProvider(provider)
+        .setContentProvider(provider)
+        .build(privKey)
+      pbe.getDataStream(dataDecryptorFactory)
+    }
+    val plainFact = new JcaPGPObjectFactory(clear)
+    // Handle compressed + uncompressed data here.
+    def extractLiteral(x: Any): PGPLiteralData = x match {
+      case msg: PGPLiteralData      => msg
+      case cData: PGPCompressedData =>
+        // Now we need to read the compressed stream of data.
+        val compressedStream = new BufferedInputStream(cData.getDataStream)
+        val pgpFact = new JcaPGPObjectFactory(compressedStream)
+        extractLiteral(pgpFact.nextObject)
+      case _: PGPOnePassSignature => throw NotEncryptedMessageException("Message is a signature")
+      case _                      => throw NotEncryptedMessageException("Message is not a simple encrypted file")
+    }
+    val msg = extractLiteral(plainFact.nextObject)
+    val result = handler(msg)
+    if (pbe.isIntegrityProtected && !pbe.verify())
+      throw IntegrityException("Encrypted message failed integrity check.")
+    result
   }
 
   private[this] def extractPrivateKey(passPhrase: Array[Char]) =
@@ -266,12 +256,9 @@ class SecretKey(val nested: PGPSecretKey) {
         throw new IncorrectPassphraseException("Incorrect passphrase", e)
     }
 
-  def userIDs = new Traversable[String] {
-    def foreach[U](f: String => U) = {
-      val i = nested.getUserIDs
-      while (i.hasNext) f(i.next.toString)
-    }
-  }
+  def userIDs: List[String] =
+    nested.getUserIDs.asScala.toList
+
   override lazy val toString = "SecretKey(%x, %s)".format(nested.getKeyID, userIDs.mkString(","))
 }
 

@@ -1,14 +1,14 @@
 package com.jsuereth.pgp
 package cli
 
-import sbt._
-import sbt.complete._
-import sbt.complete.DefaultParsers._
+import nosbt.internal.util.complete.DefaultParsers._
+import nosbt.internal.util.complete.Parser
+import nosbt.io.IO
 
 /** Constructs a new PGP key from user input. */
 case class GeneratePgpKey() extends PgpCommand {
   def run(ctx: PgpCommandContext): Unit = {
-    import ctx.{ publicKeyRingFile => pub, secretKeyRingFile => sec, log }
+    import ctx.{log, publicKeyRingFile => pub, secretKeyRingFile => sec}
     if (pub.exists) sys.error("Public key ring (" + pub.getAbsolutePath + ") already exists!")
     if (sec.exists) sys.error("Secret key ring (" + sec.getAbsolutePath + ") already exists!")
     val pparent = pub.getCanonicalFile.getParentFile
@@ -29,7 +29,7 @@ case class GeneratePgpKey() extends PgpCommand {
   }
 }
 object GeneratePgpKey {
-  def parser(ctx: PgpStaticContext): Parser[GeneratePgpKey] =
+  def parser: Parser[GeneratePgpKey] =
     token(("gen-key": Parser[String]) map { _ =>
       GeneratePgpKey()
     })

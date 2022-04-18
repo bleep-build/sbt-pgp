@@ -1,9 +1,10 @@
 package com.jsuereth.sbtpgp
 
-import sbt._
-import sbt.Keys.TaskStreams
+import bleep.logging.Logger
 import com.jsuereth.pgp._
-import sbt.sbtpgp.Compat._
+import nosbt.InteractionService
+
+import java.io.File
 
 case class SbtPgpStaticContext(publicKeyRingFile: File, secretKeyRingFile: File) extends cli.PgpStaticContext
 
@@ -12,13 +13,9 @@ case class SbtPgpCommandContext(
     ctx: cli.PgpStaticContext,
     interaction: InteractionService,
     optPassphrase: Option[Array[Char]],
-    s: TaskStreams
+    logger: Logger
 ) extends cli.PgpCommandContext
     with cli.DelegatingPgpStaticContext {
-
-  // For binary compatibility
-  def this(ctx: cli.PgpStaticContext, optPassphrase: Option[Array[Char]], s: TaskStreams) =
-    this(ctx, CommandLineUIServices, optPassphrase, s)
 
   def readInput(msg: String): String = System.out.synchronized {
     interaction.readLine(msg, mask = false) getOrElse sys.error("Failed to grab input")
@@ -31,7 +28,7 @@ case class SbtPgpCommandContext(
     case _                       => sys.error("Empty passphrase. aborting...")
   }
 
-  def withPassphrase[U](key: Long)(f: Array[Char] => U): U = {
+  def withPassphrase[U](key: Long)(f: Array[Char] => U): U =
     retry[U, IncorrectPassphraseException](3) {
       PasswordCache.withValue(
         key = ctx.secretKeyRingFile.getAbsolutePath,
@@ -45,16 +42,15 @@ case class SbtPgpCommandContext(
           e
         )
     }
-  }
 
   private def retry[A, E <: Exception](n: Int)(body: => A)(implicit desired: reflect.ClassTag[E]): Either[E, A] =
     try Right(body)
     catch {
-      case e: Exception if (desired.runtimeClass isAssignableFrom e.getClass) =>
+      case e: Exception if desired.runtimeClass isAssignableFrom e.getClass =>
         if (n <= 1) Left(e.asInstanceOf[E]) else retry[A, E](n - 1)(body)
     }
 
-  def log = s.log
+  def log = logger
   // TODO - Is this the right thing to do?
   def output[A](msg: => A): Unit = println(msg)
 }

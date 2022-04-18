@@ -1,8 +1,8 @@
-package com.jsuereth.pgp.cli
+package com.jsuereth.pgp
+package cli
 
-import sbt._
-import complete._
-import DefaultParsers._
+import nosbt.internal.util.complete.Parser
+import nosbt.internal.util.complete.DefaultParsers._
 
 object CommonParsers {
   lazy val hexaDigit = chars("ABCDEFGabcdefg0123456789")
@@ -10,9 +10,9 @@ object CommonParsers {
   lazy val keyId = token(hexanum, "<keyid>") map (java.lang.Long.parseLong(_, 16))
 
   private def hexPublicKeyIds(ctx: PgpStaticContext): Seq[String] =
-    try {
+    try
       ctx.publicKeyRing.publicKeys.view.map(_.keyID).map("%x" format (_)).toSeq
-    } catch {
+    catch {
       case _: Throwable => Seq.empty
     }
 
@@ -23,9 +23,9 @@ object CommonParsers {
   lazy val keyIdOrUser: Parser[String] = token(NotSpace, "<key id/user>")
 
   private def userIds(ctx: PgpStaticContext): Seq[String] =
-    try {
+    try
       ctx.publicKeyRing.publicKeys.view.flatMap(_.userIDs).toSeq
-    } catch {
+    catch {
       case _: Throwable => Seq.empty
     }
 
@@ -34,8 +34,6 @@ object CommonParsers {
   // TODO - ensure urls are urls
   lazy val hkpUrl = token(NotSpace, "<hkp server url>")
 
-  lazy val keyIdOption = token("keyId=") ~> keyId
-  lazy val keyIdOrUserOption = token("key=") ~> keyIdOrUser
   def existingKeyIdOrUserOption(ctx: PgpStaticContext) =
     token("key=") ~> existingKeyIdOrUser(ctx)
   lazy val attribute: Parser[(String, String)] = {

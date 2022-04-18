@@ -1,18 +1,21 @@
 package com.jsuereth.pgp
 
-import java.io._
-import java.security.Security
 import org.bouncycastle.openpgp._
 import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProvider
+
+import java.io._
+import java.security.Security
 
 /** This trait defines things that can act like a public key.  That is they can verify signed files and messages and encrypt data for an individual. */
 trait PublicKeyLike {
 
   /** Verifies a signed message and extracts the contents.
-   * @param input The incoming PGP message.
-   * @param output The decoded and verified message.
-   */
+    * @param input
+    *   The incoming PGP message.
+    * @param output
+    *   The decoded and verified message.
+    */
   def verifyMessageStream(input: InputStream, output: OutputStream): Boolean
 
   /** Reads in a PGP message from a file, verifies the signature and writes to the output file. */
@@ -37,10 +40,13 @@ trait PublicKeyLike {
   }
 
   /** Verifies a signature stream against an input stream.
-   * @param msgName the name tied in the signature for this object.  For a file, this is the filename.
-   * @param msg  The input stream containing the raw message to verify.
-   * @param signature The input stream containing the PGP signature.
-   */
+    * @param msgName
+    *   the name tied in the signature for this object. For a file, this is the filename.
+    * @param msg
+    *   The input stream containing the raw message to verify.
+    * @param signature
+    *   The input stream containing the PGP signature.
+    */
   def verifySignatureStreams(msg: InputStream, signature: InputStream): Boolean
 
   /** Reads in a raw file, verifies the signature file is valid for this file. */
@@ -93,20 +99,22 @@ trait PublicKeyLike {
   }
 
   /** Verifies that a stream was signed correctly by another stream.
-   * @throws KeyNotFoundException is signature contains an unknown public key.
-   */
+    * @throws KeyNotFoundException
+    *   is signature contains an unknown public key.
+    */
   protected def verifySignatureStreamsHelper(msg: InputStream, signature: InputStream)(
       getKey: Long => PGPPublicKey
   ): Boolean = {
     val in = PGPUtil.getDecoderStream(signature)
     // We extract the signature list and object factory based on whether or not the signature is compressed.
-    val (sigList, pgpFact) = {
+    val (sigList, pgpFact @ _) = {
       val pgpFact = new JcaPGPObjectFactory(in)
       val o = pgpFact.nextObject()
       o match {
         case c1: PGPCompressedData =>
           (pgpFact.nextObject.asInstanceOf[PGPSignatureList], new JcaPGPObjectFactory(c1.getDataStream()))
         case sigList: PGPSignatureList => (sigList, pgpFact)
+        case other                     => sys.error(s"Unexepected: $other")
       }
     }
     val dIn = new BufferedInputStream(msg)

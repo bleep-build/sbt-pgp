@@ -1,10 +1,11 @@
 package com.jsuereth.pgp
 
-import java.io._
-
 import org.bouncycastle.bcpg._
 import org.bouncycastle.openpgp._
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator
+
+import java.io._
+import scala.collection.JavaConverters._
 
 /** A collection of public keys, known as a 'ring'. */
 class PublicKeyRing(val nested: PGPPublicKeyRing) extends PublicKeyLike with StreamingSaveable {
@@ -27,20 +28,15 @@ class PublicKeyRing(val nested: PGPPublicKeyRing) extends PublicKeyLike with Str
   def apply(id: Long): PublicKey = get(id).getOrElse(sys.error("Could not find public key: " + id))
 
   /** A collection that will traverse all public keys in this key ring. */
-  def publicKeys = new Traversable[PublicKey] {
-    def foreach[U](f: PublicKey => U): Unit = {
-      val it = nested.getPublicKeys
-      while (it.hasNext) {
-        f(PublicKey(it.next.asInstanceOf[PGPPublicKey]))
-      }
-    }
-  }
-  def masterKey = publicKeys find (_.isMasterKey)
+  def publicKeys: List[PublicKey] =
+    nested.getPublicKeys.asScala.map(PublicKey.apply).toList
+
+  def masterKey = publicKeys find (_.nested.isMasterKey)
 
   /** Finds the first public key that has:
-   *  - A keyID containing the given hex code
-   *  - A userID containing the given string
-   */
+    *   - A keyID containing the given hex code
+    *   - A userID containing the given string
+    */
   def findPubKey(value: String): Option[PublicKey] = {
     def hasKeyId(k: PublicKey) = k.keyID.toHexString contains value
     def hasUserId(k: PublicKey) = k.userIDs.exists(_ contains value)
@@ -49,12 +45,12 @@ class PublicKeyRing(val nested: PGPPublicKeyRing) extends PublicKeyLike with Str
   }
 
   /** A collection that will traverse all keys that can be used to encrypt data. */
-  def encryptionKeys = publicKeys.view filter (_.isEncryptionKey)
+  def encryptionKeys = publicKeys.filter(_.nested.isEncryptionKey)
 
   /** Finds the first encryption key that has:
-   *  - A keyID containing the given hex code
-   *  - A userID containing the given string
-   */
+    *   - A keyID containing the given hex code
+    *   - A userID containing the given string
+    */
   def findEncryptionKey(value: String): Option[PublicKey] = {
     def hasKeyId(k: PublicKey) = k.keyID.toHexString contains value
     def hasUserId(k: PublicKey) = k.userIDs.exists(_ contains value)
@@ -76,7 +72,6 @@ class PublicKeyRing(val nested: PGPPublicKeyRing) extends PublicKeyLike with Str
   override def toString = "PublicKeyRing(" + publicKeys.mkString(",") + ")"
 }
 object PublicKeyRing extends StreamingLoadable[PublicKeyRing] {
-  implicit def unwrap(ring: PublicKeyRing): PGPPublicKeyRing = ring.nested
   def apply(nested: PGPPublicKeyRing) = new PublicKeyRing(nested)
   def load(input: InputStream) =
     apply(new PGPPublicKeyRing(PGPUtil.getDecoderStream(input), new JcaKeyFingerprintCalculator))

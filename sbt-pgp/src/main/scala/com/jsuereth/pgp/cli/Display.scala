@@ -4,7 +4,7 @@ package cli
 /** Helper for printing key info to console. */
 object Display {
 
-  def printFileHeader(f: java.io.File) = {
+  def printFileHeader(f: java.io.File): String = {
     val path = f.getAbsolutePath
     val line = Stream.continually('-').take(path.length).mkString("")
     path + "\n" + line + "\n"
@@ -13,8 +13,8 @@ object Display {
   def printKey(k: PublicKey) = {
     val hexkey: String = ("%x" format (k.keyID)).takeRight(8)
     val strength = k.algorithmName + "@" + k.bitStrength.toString
-    val head = if (k.isMasterKey()) "pub" else "sub"
-    val date = new java.text.SimpleDateFormat("yyyy-MM-dd").format(k.getCreationTime)
+    val head = if (k.nested.isMasterKey) "pub" else "sub"
+    val date = new java.text.SimpleDateFormat("yyyy-MM-dd").format(k.nested.getCreationTime)
     val userStrings =
       if (k.userIDs.isEmpty) ""
       else k.userIDs.map("uid\t                \t" + _).mkString("", "\n", "\n")

@@ -1,10 +1,9 @@
 package com.jsuereth.pgp
 package cli
 
-import sbt._
-import sbt.complete._
-import sbt.complete.DefaultParsers._
 import CommonParsers._
+import nosbt.internal.util.complete.Parser
+import nosbt.internal.util.complete.DefaultParsers._
 
 case class EncryptMessage(msg: String, pubKey: String) extends PgpCommand {
   def run(ctx: PgpCommandContext): Unit = {
@@ -16,10 +15,9 @@ case class EncryptMessage(msg: String, pubKey: String) extends PgpCommand {
   }
 }
 object EncryptMessage {
-  def parser(ctx: PgpStaticContext): Parser[PgpCommand] = {
+  def parser(ctx: PgpStaticContext): Parser[PgpCommand] =
     // TODO - More robust/better parsing
-    (token("encrypt-msg") ~ Space) ~> existingKeyIdOrUser(ctx) ~ (Space ~> message) map {
-      case key ~ msg => EncryptMessage(msg, key)
+    (token("encrypt-msg") ~ Space) ~> existingKeyIdOrUser(ctx) ~ (Space ~> message) map { case key ~ msg =>
+      EncryptMessage(msg, key)
     }
-  }
 }

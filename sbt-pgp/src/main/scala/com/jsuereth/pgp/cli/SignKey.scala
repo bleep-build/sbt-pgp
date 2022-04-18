@@ -1,10 +1,9 @@
 package com.jsuereth.pgp
 package cli
 
-import sbt._
-import sbt.complete._
-import sbt.complete.DefaultParsers._
-import CommonParsers._
+import com.jsuereth.pgp.cli.CommonParsers._
+import nosbt.internal.util.complete.DefaultParsers._
+import nosbt.internal.util.complete.Parser
 
 case class SignKey(pubKey: String, notation: (String, String)) extends PgpCommand {
   def run(ctx: PgpCommandContext): Unit = {
@@ -18,12 +17,11 @@ case class SignKey(pubKey: String, notation: (String, String)) extends PgpComman
         val signingKey = ctx.secretKeyRing.secretKey
         val newkey = ctx.withPassphrase(signingKey.keyID) { pw =>
           ctx.log.info("Signing key: " + key)
-          try {
+          try
             signingKey.signPublicKey(key, notation, pw)
-          } catch {
+          catch {
             case t: Throwable =>
-              ctx.log.trace(t)
-              ctx.log.error("Error signing key!")
+              ctx.log.error("Error signing key!", t)
               throw t
           }
         }
@@ -37,7 +35,7 @@ case class SignKey(pubKey: String, notation: (String, String)) extends PgpComman
 }
 object SignKey {
   def parser(ctx: PgpStaticContext): Parser[PgpCommand] =
-    ((token("sign-key") ~ Space) ~> existingKeyIdOrUserOption(ctx) ~ (Space ~> attribute)) map {
-      case key ~ attr => SignKey(key, attr)
+    ((token("sign-key") ~ Space) ~> existingKeyIdOrUserOption(ctx) ~ (Space ~> attribute)) map { case key ~ attr =>
+      SignKey(key, attr)
     }
 }

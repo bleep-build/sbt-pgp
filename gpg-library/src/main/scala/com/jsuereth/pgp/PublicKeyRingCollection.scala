@@ -2,57 +2,48 @@ package com.jsuereth.pgp
 
 import org.bouncycastle.bcpg._
 import org.bouncycastle.openpgp._
-import java.io.{ InputStream, OutputStream }
-
 import org.bouncycastle.openpgp.operator.bc.BcKeyFingerprintCalculator
+
+import java.io.{InputStream, OutputStream}
+import scala.collection.JavaConverters._
 
 /** A collection of nested key rings. */
 class PublicKeyRingCollection(val nested: PGPPublicKeyRingCollection) extends PublicKeyLike with StreamingSaveable {
 
   /** A collection of all the nested key rings. */
-  object keyRings extends Traversable[PublicKeyRing] {
-    def foreach[U](f: PublicKeyRing => U): Unit = {
-      val i = nested.getKeyRings
-      while (i.hasNext) f(PublicKeyRing(i.next.asInstanceOf[PGPPublicKeyRing]))
-    }
-  }
+  val keyRings: List[PublicKeyRing] =
+    nested.getKeyRings.asScala.map(PublicKeyRing.apply).toList
 
   /** A collection of all the public keys from all the key rings. */
-  def publicKeys: Traversable[PublicKey] = keyRings.view flatMap (_.publicKeys)
+  def publicKeys: List[PublicKey] = keyRings flatMap (_.publicKeys)
 
   /** Finds the first public key ring that has a public key that:
-   *  - A keyID containing the given hex code
-   *  - A userID containing the given string
-   */
+    *   - A keyID containing the given hex code
+    *   - A userID containing the given string
+    */
   def findPubKeyRing(value: String): Option[PublicKeyRing] =
-    (for {
-      ring <- keyRings
-      pubKey <- ring.publicKeys
-      if PGP.isPublicKeyMatching(value)(pubKey)
-    } yield ring).headOption
+    keyRings.find(ring => ring.publicKeys.exists(pubKey => PGP.isPublicKeyMatching(value)(pubKey)))
 
   /** Finds the first public key that has:
-   *  - A keyID containing the given hex code
-   *  - A userID containing the given string
-   */
-  def findPubKey(value: String): Option[PublicKey] = {
+    *   - A keyID containing the given hex code
+    *   - A userID containing the given string
+    */
+  def findPubKey(value: String): Option[PublicKey] =
     publicKeys find PGP.isPublicKeyMatching(value)
-  }
 
   /** Finds a public key using an exact id. */
   def getKey(id: Long): Option[PublicKey] =
     publicKeys find (_.keyID == id)
 
   /** A collection that will traverse all keys that can be used to encrypt data. */
-  def encryptionKeys = publicKeys filter (_.isEncryptionKey)
+  def encryptionKeys = publicKeys.filter(_.nested.isEncryptionKey)
 
   /** Finds the first encryption key that has:
-   *  - A keyID containing the given hex code
-   *  - A userID containing the given string
-   */
-  def findEncryptionKey(value: String): Option[PublicKey] = {
+    *   - A keyID containing the given hex code
+    *   - A userID containing the given string
+    */
+  def findEncryptionKey(value: String): Option[PublicKey] =
     encryptionKeys find PGP.isPublicKeyMatching(value)
-  }
 
   def +:(ring: PublicKeyRing): PublicKeyRingCollection =
     PublicKeyRingCollection(PGPPublicKeyRingCollection.addPublicKeyRing(nested, ring.nested))
@@ -74,7 +65,6 @@ class PublicKeyRingCollection(val nested: PGPPublicKeyRingCollection) extends Pu
   override def toString = "PublicKeyRingCollecton(\n\t%s\n)" format (keyRings mkString ",\n\t")
 }
 object PublicKeyRingCollection extends StreamingLoadable[PublicKeyRingCollection] {
-  implicit def unwrap(ring: PublicKeyRingCollection) = ring.nested
   def apply(nested: PGPPublicKeyRingCollection) = new PublicKeyRingCollection(nested)
   def load(input: InputStream) =
     apply(new PGPPublicKeyRingCollection(PGPUtil.getDecoderStream(input), new BcKeyFingerprintCalculator))

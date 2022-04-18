@@ -1,7 +1,10 @@
 package com.jsuereth.pgp
 package cli
 
-import sbt._
+import bleep.logging.Logger
+import com.jsuereth.pgp.{PGP, PublicKey, PublicKeyRing, PublicKeyRingCollection, SecretKeyRing}
+
+import java.io.File
 
 /** A context for accepting user input. */
 trait UICommandContext {
@@ -9,9 +12,8 @@ trait UICommandContext {
   /** Displays the message to the user and accepts their input. */
   def readInput(msg: String): String
 
-  /** Displays the message to the user and accepts their input.
-   * Replaces characters entered with '*'.
-   */
+  /** Displays the message to the user and accepts their input. Replaces characters entered with '*'.
+    */
   def readHidden(msg: String): String
 
   /** Prints the given text to whatever output we're using. */
@@ -46,14 +48,10 @@ trait PgpCommandContext extends PgpStaticContext with UICommandContext {
 
   /** Perform an action with a passphrase.  This will ensure caching or other magikz */
   def withPassphrase[U](keyId: Long)(f: Array[Char] => U): U
-  def addPublicKeyRing(key: PublicKeyRing): Unit = {
+  def addPublicKeyRing(key: PublicKeyRing): Unit =
     key.masterKey match {
       case Some(mk) if publicKeyRing.publicKeys.map(_.keyID).toSet.apply(mk.keyID) =>
-        val badring = for {
-          ring <- publicKeyRing.keyRings
-          pk <- ring.publicKeys
-          if pk.keyID == mk.keyID
-        } yield ring
+        val badring = publicKeyRing.keyRings.find(ring => ring.publicKeys.exists(_.keyID == mk.keyID))
         val newring = badring.foldLeft(publicKeyRing) { (col, ring) =>
           col removeRing ring
         }
@@ -63,7 +61,6 @@ trait PgpCommandContext extends PgpStaticContext with UICommandContext {
         val newring = publicKeyRing :+ key
         newring saveToFile publicKeyRingFile
     }
-  }
   def addPublicKey(key: PublicKey): Unit =
     addPublicKeyRing(PublicKeyRing from key)
 }

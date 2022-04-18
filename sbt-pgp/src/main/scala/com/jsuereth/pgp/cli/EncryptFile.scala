@@ -1,10 +1,11 @@
 package com.jsuereth.pgp
 package cli
 
-import sbt._
-import sbt.complete._
-import sbt.complete.DefaultParsers._
 import CommonParsers._
+import nosbt.internal.util.complete.Parser
+import nosbt.internal.util.complete.DefaultParsers._
+
+import java.io.File
 
 case class EncryptFile(file: File, pubKey: String) extends PgpCommand {
   def run(ctx: PgpCommandContext): Unit = {
@@ -17,9 +18,8 @@ case class EncryptFile(file: File, pubKey: String) extends PgpCommand {
   override def isReadOnly: Boolean = true
 }
 object EncryptFile {
-  def parser(ctx: PgpStaticContext): Parser[PgpCommand] = {
-    (token("encrypt-msg") ~ Space) ~> existingKeyIdOrUser(ctx) ~ (Space ~> filename) map {
-      case key ~ file => EncryptFile(file, key)
+  def parser(ctx: PgpStaticContext): Parser[PgpCommand] =
+    (token("encrypt-msg") ~ Space) ~> existingKeyIdOrUser(ctx) ~ (Space ~> filename) map { case key ~ file =>
+      EncryptFile(file, key)
     }
-  }
 }

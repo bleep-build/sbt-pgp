@@ -1,11 +1,12 @@
 package com.jsuereth.pgp
 
-import java.io._
 import org.bouncycastle.bcpg._
 import org.bouncycastle.openpgp._
-import java.security.{ Security, SecureRandom }
+import org.bouncycastle.openpgp.operator.jcajce.{JcePGPDataEncryptorBuilder, JcePublicKeyKeyEncryptionMethodGenerator}
 
-import org.bouncycastle.openpgp.operator.jcajce.{ JcePublicKeyKeyEncryptionMethodGenerator, JcePGPDataEncryptorBuilder }
+import java.io._
+import java.security.{SecureRandom, Security}
+import scala.collection.JavaConverters._
 
 /** This class represents a public PGP key. It can be used to encrypt messages for a person and validate that messages were signed correctly. */
 class PublicKey(val nested: PGPPublicKey) extends PublicKeyLike with StreamingSaveable {
@@ -29,33 +30,16 @@ class PublicKey(val nested: PGPPublicKey) extends PublicKeyLike with StreamingSa
   }
 
   /** Returns the userIDs associated with this public key. */
-  object userIDs extends Traversable[String] {
-    def foreach[U](f: String => U) = {
-      val i = nested.getUserIDs
-      while (i.hasNext) f(i.next.toString)
-    }
-  }
+  val userIDs: List[String] =
+    nested.getUserIDs.asScala.toList
 
-  object signatures extends Traversable[Signature] {
-    override def foreach[U](f: Signature => U): Unit = {
-      val i = nested.getSignatures()
-      while (i.hasNext) {
-        f(Signature(i.next.asInstanceOf[PGPSignature]))
-      }
-    }
-  }
+  val signatures: List[Signature] = nested.getSignatures.asScala.toList.map(Signature.apply)
 
-  def signaturesForId(id: String): Traversable[Signature] = new Traversable[Signature] {
-    override def foreach[U](f: Signature => U): Unit = {
-      val i = nested.getSignaturesForID(id)
-      while (i.hasNext) {
-        f(Signature(i.next.asInstanceOf[PGPSignature]))
-      }
-    }
-  }
+  def signaturesForId(id: String) =
+    nested.getSignaturesForID(id).asScala.toList
 
-  def directKeySignatures: Traversable[Signature] =
-    signatures.view filter (_.signatureType == PGPSignature.DIRECT_KEY)
+  def directKeySignatures: List[Signature] =
+    signatures filter (_.signatureType == PGPSignature.DIRECT_KEY)
 
   def verifyMessageStream(input: InputStream, output: OutputStream): Boolean =
     verifyMessageStreamHelper(input, output) { id =>
@@ -85,7 +69,7 @@ class PublicKey(val nested: PGPPublicKey) extends PublicKeyLike with StreamingSa
     val in = new java.io.ByteArrayInputStream(bytes)
     val out = new java.io.ByteArrayOutputStream
     // TODO - better errors...
-    try encrypt(in, out, "", bytes.length, new java.util.Date())
+    try encrypt(in, out, "", bytes.length.toLong, new java.util.Date())
     finally {
       in.close()
       out.close()
@@ -101,8 +85,6 @@ class PublicKey(val nested: PGPPublicKey) extends PublicKeyLike with StreamingSa
       lastMod: java.util.Date = new java.util.Date
   ): Unit = {
     val aout = new ArmoredOutputStream(output)
-    // TODO - Compress on the way into bytes
-    val bytes = Array.empty[Byte]
     val rand = new SecureRandom()
     val provider = Security.getProvider("BC")
     val encGen = {
@@ -140,5 +122,4 @@ class PublicKey(val nested: PGPPublicKey) extends PublicKeyLike with StreamingSa
 }
 object PublicKey {
   def apply(nested: PGPPublicKey) = new PublicKey(nested)
-  implicit def unwrap(key: PublicKey) = key.nested
 }

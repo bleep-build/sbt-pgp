@@ -1,10 +1,11 @@
 package com.jsuereth.pgp
 package cli
 
-import sbt._
-import sbt.complete._
-import sbt.complete.DefaultParsers._
-import CommonParsers._
+import com.jsuereth.pgp.cli.CommonParsers._
+import nosbt.internal.util.complete.DefaultParsers._
+import nosbt.internal.util.complete.Parser
+
+import java.io.File
 
 case class ImportKey(pubKey: File) extends PgpCommand {
   def run(ctx: PgpCommandContext): Unit = {
@@ -13,7 +14,6 @@ case class ImportKey(pubKey: File) extends PgpCommand {
   }
 }
 object ImportKey {
-  def parser(ctx: PgpStaticContext): Parser[ImportKey] = {
+  def parser: Parser[ImportKey] =
     (token("import-pub-key") ~ Space) ~> filename map ImportKey.apply
-  }
 }

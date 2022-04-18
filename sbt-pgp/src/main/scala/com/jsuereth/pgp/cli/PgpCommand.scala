@@ -1,8 +1,7 @@
 package com.jsuereth.pgp
 package cli
 
-import sbt.complete._
-import sbt.complete.DefaultParsers._
+import nosbt.internal.util.complete.Parser
 
 /** Represents a PgpCommand */
 trait PgpCommand {
@@ -13,14 +12,14 @@ trait PgpCommand {
 }
 object PgpCommand {
   def parser(ctx: PgpStaticContext): Parser[PgpCommand] =
-    (GeneratePgpKey.parser(ctx) |
-      ListKeys.parser(ctx) |
-      ListSigs.parser(ctx) |
+    GeneratePgpKey.parser |
+      ListKeys.parser |
+      ListSigs.parser |
       SendKey.parser(ctx) |
-      ReceiveKey.parser(ctx) |
-      ImportKey.parser(ctx) |
+      ReceiveKey.parser |
+      ImportKey.parser |
       EncryptMessage.parser(ctx) |
       EncryptFile.parser(ctx) |
       SignKey.parser(ctx) |
-      ExportPublicKey.parser(ctx))
+      ExportPublicKey.parser(ctx)
 }
