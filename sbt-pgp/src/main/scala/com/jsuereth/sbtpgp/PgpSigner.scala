@@ -69,7 +69,7 @@ class CommandLineGpgSigner(
     val keyargs: Seq[String] = optKey map (k => Seq("--default-key", k)) getOrElse Seq.empty
     val args = passargs ++ ringargs ++ Seq("--detach-sign", "--armor") ++ (if (agent) Seq("--use-agent") else Seq.empty) ++ keyargs
     val allArguments: Seq[String] = args ++ Seq("--output", signatureFile.getAbsolutePath, file.getAbsolutePath)
-    sys.process.Process(command, allArguments) ! ProcessLogger(logger.info(_)) match {
+    sys.process.Process(command, allArguments) ! logger.processLogger("signer") match {
       case 0 => ()
       case n => sys.error(s"Failure running '${command + " " + allArguments.mkString(" ")}'.  Exit code: " + n)
     }
@@ -110,7 +110,7 @@ class CommandLineGpgPinentrySigner(
     val args = passargs ++ ringargs ++ pinentryargs ++ Seq("--detach-sign", "--armor") ++ (if (agent) Seq("--use-agent")
                                                                                            else Seq.empty) ++ keyargs
     val allArguments: Seq[String] = args ++ Seq("--output", signatureFile.getAbsolutePath, file.getAbsolutePath)
-    sys.process.Process(command, allArguments) ! ProcessLogger(logger.info(_)) match {
+    sys.process.Process(command, allArguments) ! logger.processLogger("signer") match {
       case 0 => ()
       case n => sys.error(s"Failure running '${command + " " + allArguments.mkString(" ")}'.  Exit code: " + n)
     }
