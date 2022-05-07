@@ -1,10 +1,6 @@
 package com.jsuereth.pgp
 package cli
 
-import com.jsuereth.pgp.cli.CommonParsers._
-import nosbt.internal.util.complete.DefaultParsers._
-import nosbt.internal.util.complete.Parser
-
 import scala.concurrent._
 import scala.concurrent.duration._
 
@@ -28,13 +24,6 @@ case class SendKey(pubKey: String, hkpUrl: String) extends HkpCommand {
   override def isReadOnly: Boolean = true
 }
 
-object SendKey {
-  def parser(ctx: PgpStaticContext): Parser[SendKey] =
-    (token("send-key") ~ Space) ~> existingKeyIdOrUser(ctx) ~ (Space ~> hkpUrl) map { case key ~ url =>
-      SendKey(key, url)
-    }
-}
-
 case class ReceiveKey(pubKeyId: Long, hkpUrl: String) extends HkpCommand {
   import scala.concurrent.ExecutionContext.Implicits._
 
@@ -50,11 +39,4 @@ case class ReceiveKey(pubKeyId: Long, hkpUrl: String) extends HkpCommand {
     // TODO - Remove if key already exists...
     ctx addPublicKeyRing key
   }
-}
-object ReceiveKey {
-  def parser: Parser[ReceiveKey] =
-    // TODO - More robust...
-    (token("recv-key") ~ Space) ~> keyId ~ (Space ~> hkpUrl) map { case key ~ url =>
-      ReceiveKey(key, url)
-    }
 }

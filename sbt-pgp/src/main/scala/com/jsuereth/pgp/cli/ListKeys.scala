@@ -1,9 +1,6 @@
 package com.jsuereth.pgp
 package cli
 
-import nosbt.internal.util.complete.Parser
-import nosbt.internal.util.complete.DefaultParsers._
-
 case class ListKeys() extends PgpCommand {
   def run(ctx: PgpCommandContext): Unit = {
     import Display._
@@ -13,10 +10,4 @@ case class ListKeys() extends PgpCommand {
     }
   }
   override def isReadOnly = true
-}
-object ListKeys {
-  def parser: Parser[ListKeys] =
-    token("list-keys") map { _ =>
-      ListKeys()
-    }
 }

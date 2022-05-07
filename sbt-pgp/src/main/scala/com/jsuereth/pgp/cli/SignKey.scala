@@ -1,10 +1,6 @@
 package com.jsuereth.pgp
 package cli
 
-import com.jsuereth.pgp.cli.CommonParsers._
-import nosbt.internal.util.complete.DefaultParsers._
-import nosbt.internal.util.complete.Parser
-
 case class SignKey(pubKey: String, notation: (String, String)) extends PgpCommand {
   def run(ctx: PgpCommandContext): Unit = {
     val matches = for {
@@ -32,10 +28,4 @@ case class SignKey(pubKey: String, notation: (String, String)) extends PgpComman
     }
     newpubringcol saveToFile ctx.publicKeyRingFile
   }
-}
-object SignKey {
-  def parser(ctx: PgpStaticContext): Parser[PgpCommand] =
-    ((token("sign-key") ~ Space) ~> existingKeyIdOrUserOption(ctx) ~ (Space ~> attribute)) map { case key ~ attr =>
-      SignKey(key, attr)
-    }
 }

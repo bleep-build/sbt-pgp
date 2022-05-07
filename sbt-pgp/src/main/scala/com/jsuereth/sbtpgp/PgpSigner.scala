@@ -6,8 +6,6 @@ import java.io.File
 import com.jsuereth.pgp.cli.PgpCommandContext
 import nosbt.io.IO
 
-import scala.sys.process.ProcessLogger
-
 /** The interface used to sign plugins. */
 trait PgpSigner {
 

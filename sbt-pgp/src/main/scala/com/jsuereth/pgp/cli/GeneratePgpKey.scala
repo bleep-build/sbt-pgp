@@ -1,8 +1,6 @@
 package com.jsuereth.pgp
 package cli
 
-import nosbt.internal.util.complete.DefaultParsers._
-import nosbt.internal.util.complete.Parser
 import nosbt.io.IO
 
 /** Constructs a new PGP key from user input. */
@@ -27,10 +25,4 @@ case class GeneratePgpKey() extends PgpCommand {
     log.info("Secret key := " + sec.getAbsolutePath)
     log.info("Please do not share your secret key.   Your public key is free to share.")
   }
-}
-object GeneratePgpKey {
-  def parser: Parser[GeneratePgpKey] =
-    token(("gen-key": Parser[String]) map { _ =>
-      GeneratePgpKey()
-    })
 }
