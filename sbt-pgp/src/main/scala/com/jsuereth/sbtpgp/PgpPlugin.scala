@@ -1,12 +1,12 @@
 package com.jsuereth.sbtpgp
 
+import bleep.RelPath
 import bleep.logging.Logger
 import com.jsuereth.pgp._
 import nosbt.{FileOps, InteractionService}
 import nosbt.librarymanagement.ivy.DirectCredentials
 
 import java.io.File
-import java.nio.file.Path
 
 /** SBT Keys for the PGP plugin. */
 class PgpPlugin(val logger: Logger, val maybeCredentials: Option[DirectCredentials], val interactionService: InteractionService) {
@@ -93,12 +93,12 @@ class PgpPlugin(val logger: Logger, val maybeCredentials: Option[DirectCredentia
     )
 
   /* Packages all artifacts for publishing and maps the Artifact definition to the generated file. */
-  def signedArtifacts(paths: Iterable[Path]): Iterable[Path] = {
+  def signedArtifacts(files: Map[RelPath, Array[Byte]]): Map[RelPath, Array[Byte]] = {
     val signer = pgpSigner()
-    paths.flatMap { path =>
-      val signedArtifact = Path.of(path.toString + gpgExtension)
-      signer.sign(path.toFile, signedArtifact.toFile, logger)
-      Seq(path, signedArtifact)
+    files.flatMap { case in @ (relPath, content) =>
+      val signedArtifact = relPath.withLast(_ + gpgExtension)
+      val signedContent = signer.sign(content, logger)
+      Map(in, (signedArtifact, signedContent))
     }
   }
 }

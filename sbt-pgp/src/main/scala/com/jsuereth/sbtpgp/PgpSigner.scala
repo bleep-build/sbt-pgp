@@ -1,17 +1,16 @@
 package com.jsuereth.sbtpgp
 
 import bleep.logging.Logger
-
-import java.io.File
 import com.jsuereth.pgp.cli.PgpCommandContext
-import nosbt.io.IO
+
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File}
 
 /** The interface used to sign plugins. */
 trait PgpSigner {
 
   /** Signs a given file and writes the output to the signature file specified. Returns the signature file, throws on errors.
     */
-  def sign(file: File, signatureFile: File, logger: Logger): File
+  def sign(file: Array[Byte], logger: Logger): Array[Byte]
 }
 
 object PgpSigner {
@@ -47,8 +46,7 @@ class CommandLineGpgSigner(
     case _ => (0L, 0L)
   }
   def isLegacyGpg: Boolean = gpgVersionNumber._1 < 2L
-  def sign(file: File, signatureFile: File, logger: Logger): File = PgpSigner.lock.synchronized {
-    if (signatureFile.exists) IO.delete(signatureFile)
+  def sign(content: Array[Byte], logger: Logger): Array[Byte] = PgpSigner.lock.synchronized {
     val passargs: Seq[String] = (optPassphrase map { passArray =>
       passArray mkString ""
     } map { pass =>
@@ -66,12 +64,14 @@ class CommandLineGpgSigner(
       }
     val keyargs: Seq[String] = optKey map (k => Seq("--default-key", k)) getOrElse Seq.empty
     val args = passargs ++ ringargs ++ Seq("--detach-sign", "--armor") ++ (if (agent) Seq("--use-agent") else Seq.empty) ++ keyargs
-    val allArguments: Seq[String] = args ++ Seq("--output", signatureFile.getAbsolutePath, file.getAbsolutePath)
-    sys.process.Process(command, allArguments) ! logger.processLogger("signer") match {
+    val allArguments: Seq[String] = args ++ Seq("--output", "-")
+    val ostream = new ByteArrayOutputStream(1024)
+    val istream = new ByteArrayInputStream(content)
+    sys.process.Process(command, allArguments) #< istream #> ostream ! logger.processLogger("signer") match {
       case 0 => ()
       case n => sys.error(s"Failure running '${command + " " + allArguments.mkString(" ")}'.  Exit code: " + n)
     }
-    signatureFile
+    ostream.toByteArray
   }
 
   override val toString: String = "GPG-Command(" + command + ")"
@@ -89,8 +89,7 @@ class CommandLineGpgPinentrySigner(
     optKey: Option[String],
     optPassphrase: Option[Array[Char]]
 ) extends PgpSigner {
-  def sign(file: File, signatureFile: File, logger: Logger): File = PgpSigner.lock.synchronized {
-    if (signatureFile.exists) IO.delete(signatureFile)
+  def sign(content: Array[Byte], logger: Logger): Array[Byte] = PgpSigner.lock.synchronized {
     // (the PIN code is the passphrase)
     // https://wiki.archlinux.org/index.php/GnuPG#Unattended_passphrase
     val pinentryargs: Seq[String] = Seq("--pinentry-mode", "loopback")
@@ -107,12 +106,14 @@ class CommandLineGpgPinentrySigner(
     val keyargs: Seq[String] = optKey map (k => Seq("--default-key", k)) getOrElse Seq.empty
     val args = passargs ++ ringargs ++ pinentryargs ++ Seq("--detach-sign", "--armor") ++ (if (agent) Seq("--use-agent")
                                                                                            else Seq.empty) ++ keyargs
-    val allArguments: Seq[String] = args ++ Seq("--output", signatureFile.getAbsolutePath, file.getAbsolutePath)
-    sys.process.Process(command, allArguments) ! logger.processLogger("signer") match {
+    val allArguments: Seq[String] = args ++ Seq("--output", "-")
+    val ostream = new ByteArrayOutputStream(1024)
+    val istream = new ByteArrayInputStream(content)
+    sys.process.Process(command, allArguments) #< istream #> ostream ! logger.processLogger("signer") match {
       case 0 => ()
       case n => sys.error(s"Failure running '${command + " " + allArguments.mkString(" ")}'.  Exit code: " + n)
     }
-    signatureFile
+    ostream.toByteArray
   }
 
   override val toString: String = "GPG-Agent-Command(" + command + ")"
@@ -127,11 +128,9 @@ class BouncyCastlePgpSigner(ctx: PgpCommandContext, optKey: Option[String]) exte
     case _       => secring.secretKey.keyID
   }
 
-  def sign(file: File, signatureFile: File, logger: Logger): File =
+  def sign(content: Array[Byte], logger: Logger): Array[Byte] =
     withPassphrase(keyId) { pw =>
-      if (signatureFile.exists) IO.delete(signatureFile)
-      if (!signatureFile.getParentFile.exists) IO.createDirectory(signatureFile.getParentFile)
-      secring(keyId).sign(file, signatureFile, pw)
+      secring(keyId).sign(content, pw)
     }
   override lazy val toString: String = "BC-PGP(" + secring + ")"
 }

@@ -58,9 +58,10 @@ class SecretKey(val nested: PGPSecretKey) {
   }
 
   /** Creates a signature for a file and writes it to the signatureFile. */
-  def sign(file: File, signatureFile: File, pass: Array[Char]): File = {
-    signStream(new FileInputStream(file), new FileOutputStream(signatureFile), pass)
-    signatureFile
+  def sign(content: Array[Byte], pass: Array[Char]): Array[Byte] = {
+    val ostream = new ByteArrayOutputStream(1024)
+    signStream(new ByteArrayInputStream(content), ostream, pass)
+    ostream.toByteArray
   }
 
   /** Creates a signature for the input string. */
