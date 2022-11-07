@@ -3,7 +3,12 @@ package bleep.plugin.pgp
 import org.bouncycastle.bcpg._
 import org.bouncycastle.jce.spec.ElGamalParameterSpec
 import org.bouncycastle.openpgp._
-import org.bouncycastle.openpgp.operator.jcajce.{JcaPGPContentSignerBuilder, JcaPGPDigestCalculatorProviderBuilder, JcaPGPKeyPair, JcePBESecretKeyEncryptorBuilder}
+import org.bouncycastle.openpgp.operator.jcajce.{
+  JcaPGPContentSignerBuilder,
+  JcaPGPDigestCalculatorProviderBuilder,
+  JcaPGPKeyPair,
+  JcePBESecretKeyEncryptorBuilder
+}
 
 import java.security.{KeyPairGenerator, SecureRandom, Security}
 import java.util.Date

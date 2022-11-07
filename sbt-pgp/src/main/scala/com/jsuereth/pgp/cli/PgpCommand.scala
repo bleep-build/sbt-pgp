@@ -8,4 +8,3 @@ trait PgpCommand {
   /** Returns true if the command will not modify the public/private keys. */
   def isReadOnly: Boolean = false
 }
-

@@ -10,4 +10,3 @@ case class EncryptMessage(msg: String, pubKey: String) extends PgpCommand {
     ctx.output(key.encryptString(msg))
   }
 }
-

@@ -9,4 +9,3 @@ case class ExportPublicKey(id: String) extends PgpCommand {
   }
   override def isReadOnly: Boolean = true
 }
-

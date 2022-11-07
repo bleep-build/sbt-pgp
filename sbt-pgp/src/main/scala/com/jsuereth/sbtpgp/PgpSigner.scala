@@ -121,7 +121,7 @@ class CommandLineGpgPinentrySigner(
 
 /** A GpgSigner that uses bouncy castle. */
 class BouncyCastlePgpSigner(ctx: PgpCommandContext, optKey: Option[String]) extends PgpSigner {
-  import ctx.{withPassphrase, secretKeyRing => secring}
+  import ctx.{secretKeyRing => secring, withPassphrase}
 
   val keyId = optKey match {
     case Some(x) => new java.math.BigInteger(x, 16).longValue
