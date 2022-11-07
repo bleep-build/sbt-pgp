@@ -1,4 +1,4 @@
-package com.jsuereth.pgp
+package bleep.plugin.pgp
 
 import org.bouncycastle.bcpg._
 import org.bouncycastle.openpgp._

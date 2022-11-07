@@ -1,4 +1,4 @@
-package com.jsuereth.pgp
+package bleep.plugin.pgp
 package hkp
 
 /** A HKP command that can be sent to a HKP server. */

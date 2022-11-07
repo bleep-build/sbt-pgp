@@ -1,4 +1,4 @@
-package com.jsuereth.pgp
+package bleep.plugin.pgp
 
 package object hkp {
   // TODO - Convert to an integer first if the Long doesn't use its upper bigs.

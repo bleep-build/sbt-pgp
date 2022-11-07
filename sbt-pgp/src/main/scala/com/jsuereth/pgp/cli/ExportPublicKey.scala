@@ -1,4 +1,4 @@
-package com.jsuereth.pgp
+package bleep.plugin.pgp
 package cli
 
 case class ExportPublicKey(id: String) extends PgpCommand {

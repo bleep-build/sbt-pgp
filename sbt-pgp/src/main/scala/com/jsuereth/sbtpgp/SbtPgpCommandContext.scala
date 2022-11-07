@@ -1,8 +1,7 @@
-package com.jsuereth.sbtpgp
+package bleep.plugin.pgp
 
 import bleep.logging.Logger
-import com.jsuereth.pgp._
-import nosbt.InteractionService
+import bleep.plugin.nosbt.InteractionService
 
 import java.io.File
 

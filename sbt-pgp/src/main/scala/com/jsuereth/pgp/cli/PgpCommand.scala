@@ -1,4 +1,4 @@
-package com.jsuereth.pgp
+package bleep.plugin.pgp
 package cli
 
 /** Represents a PgpCommand */

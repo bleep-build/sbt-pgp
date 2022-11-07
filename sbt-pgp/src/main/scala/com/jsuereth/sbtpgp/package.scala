@@ -1,6 +1,6 @@
-package com.jsuereth
+package bleep.plugin
 
-package object sbtpgp {
+package object pgp {
 
   /** Default extension for PGP signatures. */
   val gpgExtension = ".asc"

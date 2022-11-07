@@ -1,7 +1,7 @@
-package com.jsuereth.sbtpgp
+package bleep.plugin.pgp
 
 import bleep.logging.Logger
-import com.jsuereth.pgp.cli.PgpCommandContext
+import bleep.plugin.pgp.cli.PgpCommandContext
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File}
 
@@ -16,7 +16,7 @@ trait PgpSigner {
 object PgpSigner {
   // This is used to synchronize signing to work around
   // https://github.com/sbt/sbt-pgp/issues/168
-  private[sbtpgp] val lock = new Object
+  private[pgp] val lock = new Object
 }
 
 /** A GpgSigner that uses the command-line to run gpg. */
@@ -121,7 +121,7 @@ class CommandLineGpgPinentrySigner(
 
 /** A GpgSigner that uses bouncy castle. */
 class BouncyCastlePgpSigner(ctx: PgpCommandContext, optKey: Option[String]) extends PgpSigner {
-  import ctx.{secretKeyRing => secring, withPassphrase}
+  import ctx.{withPassphrase, secretKeyRing => secring}
 
   val keyId = optKey match {
     case Some(x) => new java.math.BigInteger(x, 16).longValue

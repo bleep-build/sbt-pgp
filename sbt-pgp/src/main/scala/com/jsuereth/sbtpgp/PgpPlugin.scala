@@ -1,10 +1,9 @@
-package com.jsuereth.sbtpgp
+package bleep.plugin.pgp
 
 import bleep.RelPath
 import bleep.logging.Logger
-import com.jsuereth.pgp._
-import nosbt.{FileOps, InteractionService}
-import nosbt.librarymanagement.ivy.DirectCredentials
+import bleep.plugin.nosbt.librarymanagement.ivy.DirectCredentials
+import bleep.plugin.nosbt.{FileOps, InteractionService}
 
 import java.io.File
 

@@ -1,4 +1,4 @@
-package com.jsuereth.pgp
+package bleep.plugin.pgp
 package cli
 
 /** Lists Signatures on a file. */

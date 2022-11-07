@@ -1,17 +1,12 @@
-package com.jsuereth.pgp
-
-import java.security.{ SecureRandom, Security, KeyPairGenerator }
-import java.util.Date
+package bleep.plugin.pgp
 
 import org.bouncycastle.bcpg._
 import org.bouncycastle.jce.spec.ElGamalParameterSpec
 import org.bouncycastle.openpgp._
-import org.bouncycastle.openpgp.operator.jcajce.{
-  JcaPGPDigestCalculatorProviderBuilder,
-  JcaPGPContentSignerBuilder,
-  JcePBESecretKeyEncryptorBuilder,
-  JcaPGPKeyPair
-}
+import org.bouncycastle.openpgp.operator.jcajce.{JcaPGPContentSignerBuilder, JcaPGPDigestCalculatorProviderBuilder, JcaPGPKeyPair, JcePBESecretKeyEncryptorBuilder}
+
+import java.security.{KeyPairGenerator, SecureRandom, Security}
+import java.util.Date
 
 /** Helpers to generate various keys. */
 object KeyGen {

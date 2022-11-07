@@ -1,7 +1,7 @@
-package com.jsuereth.pgp
+package bleep.plugin.pgp
 package cli
 
-import nosbt.io.IO
+import bleep.plugin.nosbt.io.IO
 
 /** Constructs a new PGP key from user input. */
 case class GeneratePgpKey() extends PgpCommand {

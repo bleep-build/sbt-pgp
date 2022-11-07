@@ -1,14 +1,9 @@
-package com.jsuereth.pgp
+package bleep.plugin.pgp
 
 import org.bouncycastle.bcpg._
 import org.bouncycastle.openpgp._
 import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory
-import org.bouncycastle.openpgp.operator.jcajce.{
-  JcaPGPContentSignerBuilder,
-  JcaPGPDigestCalculatorProviderBuilder,
-  JcePBESecretKeyDecryptorBuilder,
-  JcePublicKeyDataDecryptorFactoryBuilder
-}
+import org.bouncycastle.openpgp.operator.jcajce.{JcaPGPContentSignerBuilder, JcaPGPDigestCalculatorProviderBuilder, JcePBESecretKeyDecryptorBuilder, JcePublicKeyDataDecryptorFactoryBuilder}
 
 import java.io._
 import java.security.Security

@@ -1,4 +1,4 @@
-package com.jsuereth.pgp
+package bleep.plugin.pgp
 package cli
 
 case class EncryptMessage(msg: String, pubKey: String) extends PgpCommand {

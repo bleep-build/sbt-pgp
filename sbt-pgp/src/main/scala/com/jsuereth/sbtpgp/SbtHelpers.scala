@@ -1,4 +1,4 @@
-package com.jsuereth.sbtpgp
+package bleep.plugin.pgp
 
 /** Simple caching api. So simple it's probably horribly bad in some way. OH, right... synchronization could be bad here...
   */
@@ -28,4 +28,4 @@ trait Cache[K, V] {
 // TODO - Less ugly/dangerous hack here...
 //  - Expire passwords after N minutes etc.
 //  - Kill password only on password exceptions.
-private[sbtpgp] object PasswordCache extends Cache[String, Array[Char]]
+private[pgp] object PasswordCache extends Cache[String, Array[Char]]

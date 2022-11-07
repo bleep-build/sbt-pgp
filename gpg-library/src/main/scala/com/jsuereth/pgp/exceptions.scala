@@ -1,4 +1,4 @@
-package com.jsuereth.pgp
+package bleep.plugin.pgp
 
 /** Base class for exceptions thrown in PGP library. */
 trait PgpException extends Exception

@@ -1,4 +1,4 @@
-package com.jsuereth.pgp
+package bleep.plugin.pgp
 package cli
 
 case class SignKey(pubKey: String, notation: (String, String)) extends PgpCommand {
