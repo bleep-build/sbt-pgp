@@ -5,7 +5,7 @@ import org.bouncycastle.openpgp._
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator
 
 import java.io._
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /** A collection of public keys, known as a 'ring'. */
 class PublicKeyRing(val nested: PGPPublicKeyRing) extends PublicKeyLike with StreamingSaveable {

@@ -6,7 +6,7 @@ import org.bouncycastle.openpgp.operator.jcajce.{JcePGPDataEncryptorBuilder, Jce
 
 import java.io._
 import java.security.{SecureRandom, Security}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /** This class represents a public PGP key. It can be used to encrypt messages for a person and validate that messages were signed correctly. */
 class PublicKey(val nested: PGPPublicKey) extends PublicKeyLike with StreamingSaveable {

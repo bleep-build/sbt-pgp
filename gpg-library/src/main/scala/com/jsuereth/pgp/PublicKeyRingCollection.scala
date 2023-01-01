@@ -5,7 +5,7 @@ import org.bouncycastle.openpgp._
 import org.bouncycastle.openpgp.operator.bc.BcKeyFingerprintCalculator
 
 import java.io.{InputStream, OutputStream}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /** A collection of nested key rings. */
 class PublicKeyRingCollection(val nested: PGPPublicKeyRingCollection) extends PublicKeyLike with StreamingSaveable {

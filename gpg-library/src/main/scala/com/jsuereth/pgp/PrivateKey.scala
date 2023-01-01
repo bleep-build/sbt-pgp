@@ -13,7 +13,7 @@ import org.bouncycastle.openpgp.operator.jcajce.{
 import java.io._
 import java.security.Security
 import java.util.Date
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class IncorrectPassphraseException(msg: String, cause: Throwable) extends RuntimeException(msg, cause)
 

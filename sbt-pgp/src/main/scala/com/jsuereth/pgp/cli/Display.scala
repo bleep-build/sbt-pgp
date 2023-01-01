@@ -1,12 +1,14 @@
 package bleep.plugin.pgp
 package cli
 
+import scala.collection.compat.immutable.LazyList
+
 /** Helper for printing key info to console. */
 object Display {
 
   def printFileHeader(f: java.io.File): String = {
     val path = f.getAbsolutePath
-    val line = Stream.continually('-').take(path.length).mkString("")
+    val line = LazyList.continually('-').take(path.length).mkString("")
     path + "\n" + line + "\n"
   }
 
