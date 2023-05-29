@@ -1,7 +1,7 @@
 package bleep.plugin.pgp
 
 import bleep.logging.Logger
-import bleep.plugin.nosbt.InteractionService
+import bleep.nosbt.InteractionService
 
 import java.io.File
 
