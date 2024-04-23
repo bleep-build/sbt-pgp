@@ -12,13 +12,12 @@ trait HkpCommand extends PgpCommand {
 
 case class SendKey(pubKey: String, hkpUrl: String) extends HkpCommand {
   def run(ctx: PgpCommandContext): Unit = {
-    import ctx.{log, publicKeyRing => pubring}
-    val key = pubring findPubKeyRing pubKey getOrElse sys.error("Could not find public key: " + pubKey)
+    val key = ctx.publicKeyRing findPubKeyRing pubKey getOrElse sys.error("Could not find public key: " + pubKey)
     val client = hkpClient
-    log.info("Sending " + key + " to " + client)
+    ctx.log.info("Sending " + key + " to " + client)
     client.pushKeyRing(
       key,
-      (s: String) => log.debug(s)
+      (s: String) => ctx.log.debug(s)
     )
   }
   override def isReadOnly: Boolean = true

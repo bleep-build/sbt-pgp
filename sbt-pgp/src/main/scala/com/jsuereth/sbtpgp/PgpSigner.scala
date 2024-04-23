@@ -121,16 +121,14 @@ class CommandLineGpgPinentrySigner(
 
 /** A GpgSigner that uses bouncy castle. */
 class BouncyCastlePgpSigner(ctx: PgpCommandContext, optKey: Option[String]) extends PgpSigner {
-  import ctx.{secretKeyRing => secring, withPassphrase}
-
   val keyId = optKey match {
     case Some(x) => new java.math.BigInteger(x, 16).longValue
-    case _       => secring.secretKey.keyID
+    case _       => ctx.secretKeyRing.secretKey.keyID
   }
 
   def sign(content: Array[Byte], logger: Logger): Array[Byte] =
-    withPassphrase(keyId) { pw =>
-      secring(keyId).sign(content, pw)
+    ctx.withPassphrase(keyId) { pw =>
+      ctx.secretKeyRing(keyId).sign(content, pw)
     }
-  override lazy val toString: String = "BC-PGP(" + secring + ")"
+  override lazy val toString: String = "BC-PGP(" + ctx.secretKeyRing + ")"
 }
