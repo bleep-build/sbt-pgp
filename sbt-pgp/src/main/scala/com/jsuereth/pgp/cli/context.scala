@@ -2,7 +2,6 @@ package bleep.plugin.pgp
 package cli
 
 import bleep.logging.Logger
-import bleep.plugin.pgp.PublicKey
 
 import java.io.File
 

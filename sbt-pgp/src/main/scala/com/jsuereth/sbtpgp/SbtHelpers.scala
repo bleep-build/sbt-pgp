@@ -1,4 +1,5 @@
-package bleep.plugin.pgp
+package bleep
+package plugin.pgp
 
 /** Simple caching api. So simple it's probably horribly bad in some way. OH, right... synchronization could be bad here...
   */
@@ -20,7 +21,7 @@ trait Cache[K, V] {
     catch {
       case t: Exception =>
         // Clear the cache on any exception
-        synchronized(cache remove key)
+        synchronized(cache remove key).discard()
         throw t
     }
 }

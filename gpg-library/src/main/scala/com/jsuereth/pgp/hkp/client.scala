@@ -1,4 +1,5 @@
-package bleep.plugin.pgp
+package bleep
+package plugin.pgp
 package hkp
 
 import java.io.InputStream
@@ -24,10 +25,10 @@ trait Client {
 // case class KeyIndexResult(id: String, identity: String, date: java.util.Date)
 
 private[hkp] class GigahorseClient(serverUrl: String) extends Client {
-  import gigahorse._
+  import gigahorse.*
   import support.okhttp.Gigahorse
 
-  import scala.concurrent.ExecutionContext.Implicits._
+  import scala.concurrent.ExecutionContext.Implicits.*
   val http = Gigahorse.http(Gigahorse.config)
   def asInputStream: FullResponse => InputStream =
     (r: FullResponse) => new ByteBufferBackedInputStream(r.bodyAsByteBuffer)
@@ -52,22 +53,22 @@ private[hkp] class GigahorseClient(serverUrl: String) extends Client {
     }
 
   /** Pushes a key to the given public key server. */
-  def pushKey(key: PublicKey, logger: String => Unit): Unit = {
-    http.run(
-      initiateFormPost(AddKey(key)),
-      Gigahorse.asString.andThen((c: String) => logger("received: " + c))
-    )
-    ()
-  }
+  def pushKey(key: PublicKey, logger: String => Unit): Unit =
+    http
+      .run(
+        initiateFormPost(AddKey(key)),
+        Gigahorse.asString.andThen((c: String) => logger("received: " + c))
+      )
+      .discard()
 
   /** Pushes a key to the given public key server. */
-  def pushKeyRing(key: PublicKeyRing, logger: String => Unit): Unit = {
-    http.run(
-      initiateFormPost(AddKey(key)),
-      Gigahorse.asString.andThen((c: String) => logger("received: " + c))
-    )
-    ()
-  }
+  def pushKeyRing(key: PublicKeyRing, logger: String => Unit): Unit =
+    http
+      .run(
+        initiateFormPost(AddKey(key)),
+        Gigahorse.asString.andThen((c: String) => logger("received: " + c))
+      )
+      .discard()
 
   /** Searches for a term on the keyserver and returns all the results. */
   def search(term: String): Future[Vector[LookupKeyResult]] =
