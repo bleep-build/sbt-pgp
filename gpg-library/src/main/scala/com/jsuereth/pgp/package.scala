@@ -1,8 +1,9 @@
 package bleep.plugin.pgp
 
+import bleep.DiscardOps
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 
-import java.io._
+import java.io.*
 
 // TODO - make this a real package object?
 object PGP {
@@ -16,7 +17,7 @@ object PGP {
     if (java.security.Security.getProvider(newProvider.getName) != null) {
       java.security.Security.removeProvider(newProvider.getName)
     }
-    java.security.Security.addProvider(newProvider)
+    java.security.Security.addProvider(newProvider).discard()
   } catch {
     case _: Throwable => sys.error("Could not initialize bouncy castle encryption.")
   }
