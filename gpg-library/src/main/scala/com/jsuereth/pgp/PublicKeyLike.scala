@@ -1,10 +1,10 @@
 package bleep.plugin.pgp
 
-import org.bouncycastle.openpgp._
+import org.bouncycastle.openpgp.*
 import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProvider
 
-import java.io._
+import java.io.*
 import java.security.Security
 
 /** This trait defines things that can act like a public key.  That is they can verify signed files and messages and encrypt data for an individual. */

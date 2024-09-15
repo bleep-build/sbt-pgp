@@ -1,6 +1,6 @@
 package bleep.plugin.pgp
 
-import java.io._
+import java.io.*
 
 /** This trait is for companion objects that have objects which can streamed in.
   */

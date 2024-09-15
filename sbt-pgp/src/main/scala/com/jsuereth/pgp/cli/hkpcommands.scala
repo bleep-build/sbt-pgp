@@ -1,8 +1,8 @@
 package bleep.plugin.pgp
 package cli
 
-import scala.concurrent._
-import scala.concurrent.duration._
+import scala.concurrent.*
+import scala.concurrent.duration.*
 
 /** Helper for running HKP protocol commands. */
 trait HkpCommand extends PgpCommand {

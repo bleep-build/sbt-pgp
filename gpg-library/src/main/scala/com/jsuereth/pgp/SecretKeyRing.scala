@@ -1,11 +1,11 @@
 package bleep.plugin.pgp
 
-import org.bouncycastle.bcpg._
-import org.bouncycastle.openpgp._
+import org.bouncycastle.bcpg.*
+import org.bouncycastle.openpgp.*
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator
 
-import java.io._
-import scala.jdk.CollectionConverters._
+import java.io.*
+import scala.jdk.CollectionConverters.*
 
 /** A secret PGP key ring. Can be used to decrypt messages and to sign files/messages. */
 class SecretKeyRing(val nested: PGPSecretKeyRing) extends StreamingSaveable {

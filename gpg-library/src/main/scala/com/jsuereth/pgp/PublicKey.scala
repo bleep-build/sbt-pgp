@@ -1,12 +1,12 @@
 package bleep.plugin.pgp
 
-import org.bouncycastle.bcpg._
-import org.bouncycastle.openpgp._
+import org.bouncycastle.bcpg.*
+import org.bouncycastle.openpgp.*
 import org.bouncycastle.openpgp.operator.jcajce.{JcePGPDataEncryptorBuilder, JcePublicKeyKeyEncryptionMethodGenerator}
 
-import java.io._
+import java.io.*
 import java.security.{SecureRandom, Security}
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 /** This class represents a public PGP key. It can be used to encrypt messages for a person and validate that messages were signed correctly. */
 class PublicKey(val nested: PGPPublicKey) extends PublicKeyLike with StreamingSaveable {

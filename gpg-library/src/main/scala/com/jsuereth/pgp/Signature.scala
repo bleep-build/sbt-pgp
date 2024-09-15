@@ -1,7 +1,7 @@
 package bleep.plugin.pgp
 
-import org.bouncycastle.bcpg._
-import org.bouncycastle.openpgp._
+import org.bouncycastle.bcpg.*
+import org.bouncycastle.openpgp.*
 
 /** Wrapper around a PGP signature for convenience. */
 class Signature(val nested: PGPSignature) extends StreamingSaveable {

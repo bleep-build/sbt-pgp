@@ -1,8 +1,8 @@
 package bleep.plugin.pgp
 
-import org.bouncycastle.bcpg._
+import org.bouncycastle.bcpg.*
 import org.bouncycastle.jce.spec.ElGamalParameterSpec
-import org.bouncycastle.openpgp._
+import org.bouncycastle.openpgp.*
 import org.bouncycastle.openpgp.operator.jcajce.{
   JcaPGPContentSignerBuilder,
   JcaPGPDigestCalculatorProviderBuilder,

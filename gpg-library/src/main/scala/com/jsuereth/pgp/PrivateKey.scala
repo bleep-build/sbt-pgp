@@ -1,7 +1,7 @@
 package bleep.plugin.pgp
 
-import org.bouncycastle.bcpg._
-import org.bouncycastle.openpgp._
+import org.bouncycastle.bcpg.*
+import org.bouncycastle.openpgp.*
 import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory
 import org.bouncycastle.openpgp.operator.jcajce.{
   JcaPGPContentSignerBuilder,
@@ -10,10 +10,10 @@ import org.bouncycastle.openpgp.operator.jcajce.{
   JcePublicKeyDataDecryptorFactoryBuilder
 }
 
-import java.io._
+import java.io.*
 import java.security.Security
 import java.util.Date
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 class IncorrectPassphraseException(msg: String, cause: Throwable) extends RuntimeException(msg, cause)
 

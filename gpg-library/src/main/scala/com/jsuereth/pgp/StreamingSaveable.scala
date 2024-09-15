@@ -1,6 +1,6 @@
 package bleep.plugin.pgp
 
-import java.io._
+import java.io.*
 
 /** This trait represents something that can be saved. If the class can provide a single saveTo(OutputStream) method, then this trait provides corresponding
   * saveToFile and saveToString methods.

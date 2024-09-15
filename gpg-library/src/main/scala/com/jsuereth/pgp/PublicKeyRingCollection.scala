@@ -1,11 +1,11 @@
 package bleep.plugin.pgp
 
-import org.bouncycastle.bcpg._
-import org.bouncycastle.openpgp._
+import org.bouncycastle.bcpg.*
+import org.bouncycastle.openpgp.*
 import org.bouncycastle.openpgp.operator.bc.BcKeyFingerprintCalculator
 
 import java.io.{InputStream, OutputStream}
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 /** A collection of nested key rings. */
 class PublicKeyRingCollection(val nested: PGPPublicKeyRingCollection) extends PublicKeyLike with StreamingSaveable {
