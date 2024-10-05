@@ -1,9 +1,9 @@
 package bleep.plugin.pgp
 
 import bleep.RelPath
-import bleep.logging.Logger
 import bleep.nosbt.librarymanagement.ivy.DirectCredentials
 import bleep.nosbt.{FileOps, InteractionService}
+import ryddig.Logger
 
 import java.io.File
 

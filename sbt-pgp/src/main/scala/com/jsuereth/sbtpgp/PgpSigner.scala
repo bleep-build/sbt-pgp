@@ -1,7 +1,7 @@
 package bleep.plugin.pgp
 
-import bleep.logging.Logger
 import bleep.plugin.pgp.cli.PgpCommandContext
+import ryddig.{Logger, processLogger}
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File}
 
@@ -67,7 +67,7 @@ class CommandLineGpgSigner(
     val allArguments: Seq[String] = args ++ Seq("--output", "-")
     val ostream = new ByteArrayOutputStream(1024)
     val istream = new ByteArrayInputStream(content)
-    sys.process.Process(command, allArguments) #< istream #> ostream ! logger.processLogger("signer") match {
+    sys.process.Process(command, allArguments) #< istream #> ostream ! processLogger(logger, "signer") match {
       case 0 => ()
       case n => sys.error(s"Failure running '${command + " " + allArguments.mkString(" ")}'.  Exit code: " + n)
     }
@@ -109,7 +109,7 @@ class CommandLineGpgPinentrySigner(
     val allArguments: Seq[String] = args ++ Seq("--output", "-")
     val ostream = new ByteArrayOutputStream(1024)
     val istream = new ByteArrayInputStream(content)
-    sys.process.Process(command, allArguments) #< istream #> ostream ! logger.processLogger("signer") match {
+    sys.process.Process(command, allArguments) #< istream #> ostream ! processLogger(logger, "signer") match {
       case 0 => ()
       case n => sys.error(s"Failure running '${command + " " + allArguments.mkString(" ")}'.  Exit code: " + n)
     }

@@ -1,7 +1,7 @@
 package bleep.plugin.pgp
 package cli
 
-import bleep.logging.Logger
+import ryddig.Logger
 
 import java.io.File
 
