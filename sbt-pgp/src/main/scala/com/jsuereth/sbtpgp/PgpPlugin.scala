@@ -19,7 +19,7 @@ class PgpPlugin(val logger: Logger, val maybeCredentials: Option[DirectCredentia
     val (h, t) = (fs.head, fs.tail)
     if (t.isEmpty) h
     else if (h.exists) h
-    else fallbackFiles(t: _*)
+    else fallbackFiles(t*)
   }
 
   /* "The location of the key ring, passed to gpg command as --no-default-keyring --keyring <value>. */

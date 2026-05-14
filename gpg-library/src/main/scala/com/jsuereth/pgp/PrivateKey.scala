@@ -97,7 +97,7 @@ class SecretKey(val nested: PGPSecretKey) {
       sGen.setHashedSubpackets(spGen.generate())
     }
     val cGen = new PGPCompressedDataGenerator(CompressionAlgorithmTags.ZLIB)
-    val bOut = new BCPGOutputStream(cGen open armoredOut)
+    val bOut = new BCPGOutputStream(cGen `open` armoredOut)
     sGen.generateOnePassVersion(false).encode(bOut)
     val lGen = new PGPLiteralDataGenerator()
     val lOut = lGen.open(bOut, PGPLiteralData.BINARY, name, length, lastMod)
@@ -203,7 +203,7 @@ class SecretKey(val nested: PGPSecretKey) {
       fOut.close()
     }
 
-  private[this] def decryptHelper[U](input: InputStream, passPhrase: Array[Char])(handler: PGPLiteralData => U): U = {
+  private def decryptHelper[U](input: InputStream, passPhrase: Array[Char])(handler: PGPLiteralData => U): U = {
     val fixIn = PGPUtil.getDecoderStream(input)
     val objF = new JcaPGPObjectFactory(fixIn)
     // TODO - better method to advance to encrypted data.
@@ -245,7 +245,7 @@ class SecretKey(val nested: PGPSecretKey) {
     result
   }
 
-  private[this] def extractPrivateKey(passPhrase: Array[Char]) =
+  private def extractPrivateKey(passPhrase: Array[Char]) =
     try {
       val provider = Security.getProvider("BC")
       val decryptorFactory = new JcePBESecretKeyDecryptorBuilder(

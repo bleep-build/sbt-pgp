@@ -36,12 +36,10 @@ class Signature(val nested: PGPSignature) extends StreamingSaveable {
     case _                                     => "Not enumerated"
   }
   override def saveTo(output: java.io.OutputStream): Unit =
-    nested encode (new ArmoredOutputStream(output))
+    nested `encode` (new ArmoredOutputStream(output))
 
   override def toString =
-    "Signature(key=%x,user=%s,notations=%s)" format (keyID,
-    signerUserID,
-    notations map { case (k, v) => k + " -> " + v } mkString ",")
+    "Signature(key=%x,user=%s,notations=%s)" format (keyID, signerUserID, notations map { case (k, v) => k + " -> " + v } mkString ",")
 }
 
 object Signature {

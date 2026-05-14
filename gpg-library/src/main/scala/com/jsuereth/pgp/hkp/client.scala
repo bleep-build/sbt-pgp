@@ -46,7 +46,7 @@ private[hkp] class GigahorseClient(serverUrl: String) extends Client {
   // we have to look for ids matching the string, since IDs tend to be sent with lower 32 bits.
   def findId(ring: PublicKeyRing, id: Long): Future[PublicKey] =
     (ring.publicKeys find { k =>
-      idToString(k.keyID) contains idToString(id)
+      idToString(k.keyID) `contains` idToString(id)
     }) match {
       case Some(x) => Future.successful(x)
       case _       => Future.failed(new RuntimeException(s"Key $id was not found."))
@@ -91,10 +91,10 @@ uid:Terry Suereth (CE2008) <tsuereth@digipen.edu>:1137516901::
 
 Note: Type bits/keyID    Date
    */
-  private[this] def initiateRequest(cmd: HkpCommand): Request =
-    Gigahorse.url(serverUrl + cmd.url).addQueryString(cmd.vars.toList: _*)
+  private def initiateRequest(cmd: HkpCommand): Request =
+    Gigahorse.url(serverUrl + cmd.url).addQueryString(cmd.vars.toList*)
 
-  private[this] def initiateFormPost(cmd: HkpCommand): Request =
+  private def initiateFormPost(cmd: HkpCommand): Request =
     Gigahorse
       .url(serverUrl + cmd.url)
       .post(cmd.vars map { case (k, v) =>

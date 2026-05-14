@@ -22,9 +22,9 @@ case class SignKey(pubKey: String, notation: (String, String)) extends PgpComman
           }
         }
         val newpubring = ring :+ newkey
-        (ctx.publicKeyRing removeRing ring) :+ newpubring
+        (ctx.publicKeyRing `removeRing` ring) :+ newpubring
       case Nil => sys.error("Could not find key: " + pubKey)
     }
-    newpubringcol saveToFile ctx.publicKeyRingFile
+    newpubringcol `saveToFile` ctx.publicKeyRingFile
   }
 }

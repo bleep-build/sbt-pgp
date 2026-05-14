@@ -51,7 +51,7 @@ class PublicKeyRingCollection(val nested: PGPPublicKeyRingCollection) extends Pu
   def removeRing(ring: PublicKeyRing): PublicKeyRingCollection =
     PublicKeyRingCollection(PGPPublicKeyRingCollection.removePublicKeyRing(nested, ring.nested))
 
-  private[this] def pkeyLookup(id: Long): PGPPublicKey =
+  private def pkeyLookup(id: Long): PGPPublicKey =
     getKey(id) map (_.nested) getOrElse (throw new KeyNotFoundException(id))
   def verifyMessageStream(input: InputStream, output: OutputStream): Boolean =
     verifyMessageStreamHelper(input, output)(pkeyLookup)

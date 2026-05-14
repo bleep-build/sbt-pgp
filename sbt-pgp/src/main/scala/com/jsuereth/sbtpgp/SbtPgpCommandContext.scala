@@ -35,7 +35,7 @@ case class SbtPgpCommandContext(
       )(f)
     } match {
       case Right(u) => u
-      case Left(e) =>
+      case Left(e)  =>
         throw new IllegalArgumentException(
           s"Wrong passphrase for key ${key.toHexString.toUpperCase} in ${ctx.secretKeyRingFile.getAbsolutePath}: ${e.getMessage}. aborting...",
           e
@@ -45,7 +45,7 @@ case class SbtPgpCommandContext(
   private def retry[A, E <: Exception](n: Int)(body: => A)(implicit desired: reflect.ClassTag[E]): Either[E, A] =
     try Right(body)
     catch {
-      case e: Exception if desired.runtimeClass isAssignableFrom e.getClass =>
+      case e: Exception if desired.runtimeClass `isAssignableFrom` e.getClass =>
         if (n <= 1) Left(e.asInstanceOf[E]) else retry[A, E](n - 1)(body)
     }
 

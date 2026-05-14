@@ -27,8 +27,8 @@ trait PgpStaticContext {
   def publicKeyRingFile: File
   def secretKeyRingFile: File
   // Derived methods
-  def publicKeyRing: PublicKeyRingCollection = PGP loadPublicKeyRingCollection publicKeyRingFile
-  def secretKeyRing: SecretKeyRing = PGP loadSecretKeyRing secretKeyRingFile
+  def publicKeyRing: PublicKeyRingCollection = PGP `loadPublicKeyRingCollection` publicKeyRingFile
+  def secretKeyRing: SecretKeyRing = PGP `loadSecretKeyRing` secretKeyRingFile
 }
 
 trait DelegatingPgpStaticContext extends PgpStaticContext {
@@ -52,14 +52,14 @@ trait PgpCommandContext extends PgpStaticContext with UICommandContext {
       case Some(mk) if publicKeyRing.publicKeys.map(_.keyID).toSet.apply(mk.keyID) =>
         val badring = publicKeyRing.keyRings.find(ring => ring.publicKeys.exists(_.keyID == mk.keyID))
         val newring = badring.foldLeft(publicKeyRing) { (col, ring) =>
-          col removeRing ring
+          col `removeRing` ring
         }
         val newring2 = newring :+ key
-        newring2 saveToFile publicKeyRingFile
+        newring2 `saveToFile` publicKeyRingFile
       case _ =>
         val newring = publicKeyRing :+ key
-        newring saveToFile publicKeyRingFile
+        newring `saveToFile` publicKeyRingFile
     }
   def addPublicKey(key: PublicKey): Unit =
-    addPublicKeyRing(PublicKeyRing from key)
+    addPublicKeyRing(PublicKeyRing `from` key)
 }

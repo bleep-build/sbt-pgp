@@ -12,7 +12,7 @@ trait HkpCommand extends PgpCommand {
 
 case class SendKey(pubKey: String, hkpUrl: String) extends HkpCommand {
   def run(ctx: PgpCommandContext): Unit = {
-    val key = ctx.publicKeyRing findPubKeyRing pubKey getOrElse sys.error("Could not find public key: " + pubKey)
+    val key = ctx.publicKeyRing `findPubKeyRing` pubKey getOrElse sys.error("Could not find public key: " + pubKey)
     val client = hkpClient
     ctx.log.info("Sending " + key + " to " + client)
     client.pushKeyRing(
@@ -36,6 +36,6 @@ case class ReceiveKey(pubKeyId: Long, hkpUrl: String) extends HkpCommand {
     val key: PublicKeyRing = Await.result(f, Duration.Inf)
     ctx.log.info("Adding public key: " + key)
     // TODO - Remove if key already exists...
-    ctx addPublicKeyRing key
+    ctx `addPublicKeyRing` key
   }
 }

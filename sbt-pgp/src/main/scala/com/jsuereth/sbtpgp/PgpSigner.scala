@@ -1,7 +1,7 @@
 package bleep.plugin.pgp
 
 import bleep.plugin.pgp.cli.PgpCommandContext
-import ryddig.{Logger, processLogger}
+import ryddig.{processLogger, Logger}
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File}
 

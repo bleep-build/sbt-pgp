@@ -19,6 +19,7 @@ class PublicKey(val nested: PGPPublicKey) extends PublicKeyLike with StreamingSa
   def fingerprint = nested.getFingerprint
   def isRevoked = nested.hasRevocation
   def algorithm = nested.getAlgorithm
+  @scala.annotation.nowarn("msg=EC")
   def algorithmName = nested.getAlgorithm match {
     case PublicKeyAlgorithmTags.RSA_ENCRYPT | PublicKeyAlgorithmTags.RSA_GENERAL | PublicKeyAlgorithmTags.RSA_SIGN =>
       "RSA"
